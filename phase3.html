@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Features Guessing Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .game-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+        
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            flex: 3;
+        }
+        
+        .card {
+            height: 250px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        
+        .card-front {
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card-back {
+            background: linear-gradient(135deg, #e0e0e0, #c0c0c0);
+            transform: rotateY(180deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card-back::after {
+            content: "?";
+            font-size: 4em;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .character-name {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .feature-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+        }
+        
+        .feature-item {
+            padding: 4px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .feature-name {
+            font-weight: bold;
+            font-size: 1.0em;
+        }
+        .feature-name-small {
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        
+        .feature-value {
+            font-family: monospace;
+        }
+        
+        .feature-value.true {
+            color: #2ecc71;
+        }
+        
+        .feature-value.false {
+            color: #e74c3c;
+        }
+        
+        .sidebar {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .sidebar h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .your-character-box {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        
+        .character-label {
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        
+        .nationality-container {
+            display: flex;
+            width: 100%;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .nationality-button {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        
+        .nationality-button:hover {
+            transform: translateY(-3px);
+        }
+        
+        .nationality-button:active {
+            transform: translateY(1px);
+        }
+        
+        .red-nationality {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .blue-nationality {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .red-border {
+            border: 3px solid #e74c3c;
+        }
+        
+        .blue-border {
+            border: 3px solid #3498db;
+        }
+        
+        .toggle-button {
+            padding: 10px 15px;
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            transition: background-color 0.3s;
+        }
+        
+        .toggle-button:hover {
+            background-color: #8e44ad;
+        }
+        
+        .toggle-button:active {
+            transform: translateY(1px);
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .result-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .correct {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .incorrect {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                order: -1;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Binary Features Guessing Game</h1>
+    
+    <div class="controls">
+        <button id="toggle-features-button" class="toggle-button">Toggle to Real Problem</button>
+    </div>
+    
+    <div class="game-container">
+        <div class="cards-grid" id="cards-container">
+            <!-- Cards will be generated here by JavaScript -->
+        </div>
+        
+        <div class="sidebar">
+            <h2 id="your_character">Your Character</h2>
+            <div class="your-character-box">
+                <div id="your-character-name" class="character-label"></div>
+                <ul id="your-character-features" class="feature-list">
+                    <!-- Features will be added here -->
+                </ul>
+            </div>
+            
+            <div class="nationality-container">
+                <button id="red-button" class="nationality-button red-nationality">Group A</button>
+                <button id="blue-button" class="nationality-button blue-nationality">Group B</button>
+            </div>
+            
+            <div id="result-message" class="result-message"></div>
+            
+            <div class="instructions">
+                <p>Analyze the features of the characters on the board to determine which group your character belongs to.</p>
+                <p>Red borders indicate characters from Group A.</p>
+                <p>Blue borders indicate characters from Group B.</p>
+                <p>Make your guess by clicking one of the group buttons.</p>
+                <p>You can toggle between different feature naming systems using the purple button at the top.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CSV data hardcoded as raw text
+        const csvData = `name,has_glasses,has_hat,has_beard,has_mustache,has_earrings,has_blue_eyes,has_red_hair,nationality
+Alex,1,0,0,0,0,1,0,A
+Bernard,0,1,1,0,0,0,0,B
+Claire,1,0,0,0,1,1,0,A
+David,0,0,1,1,0,0,0,B
+Eric,0,1,0,0,0,1,0,A
+Frans,0,0,0,1,0,0,1,B
+George,1,0,1,0,0,1,0,A
+Herman,0,1,0,0,0,0,1,B
+Isabella,1,0,0,0,1,1,0,A
+Jenny,0,1,0,0,1,0,0,B
+Karl,1,0,1,1,0,1,0,A
+Lisa,0,0,0,0,1,0,1,B
+Martin,1,1,0,0,0,1,0,A
+Nancy,0,1,0,0,1,0,0,B
+Oliver,1,0,1,0,0,1,0,A
+Peter,0,0,0,1,0,0,1,B
+Quincy,1,1,0,0,0,1,0,A
+Robert,0,0,1,1,0,0,0,B
+Sarah,1,0,0,0,1,1,0,A
+Tom,0,1,0,0,0,0,1,B
+Ursula,1,0,0,0,1,1,0,A
+Victor,0,0,1,1,0,0,0,B
+William,1,1,0,0,0,1,0,A
+Xavier,0,0,0,1,0,0,1,B
+Zoe,1,0,0,0,1,1,0,A
+Yann,0,1,1,0,0,0,0,B
+Wendy,1,0,0,0,1,1,0,A
+Vincent,0,0,1,1,0,0,0,B
+Ulrich,0,1,0,0,0,1,0,A
+Tina,0,0,0,0,1,0,1,B`;
+
+        // Define two sets of feature labels
+        const featureLabelsSet1 = [
+            { key: 'has_glasses', label: 'Is White' },
+            { key: 'has_hat', label: 'Brown Eyes' },
+            { key: 'has_beard', label: 'Black Hair' },
+            { key: 'has_mustache', label: 'Is Female' },
+            { key: 'has_earrings', label: 'Mustache/Rouge' },
+            { key: 'has_blue_eyes', label: 'Has Glasses' },
+            { key: 'has_red_hair', label: 'Artsy Background' }
+        ];
+        
+        const featureLabelsSet2 = [
+            { key: 'has_glasses', label: 'Resp, Structural Incomplete' },
+            { key: 'has_hat', label: 'Risk: Low' },
+            { key: 'has_beard', label: 'Resp, Excellent' },
+            { key: 'has_mustache', label: 'Adenopathy No' },
+            { key: 'has_earrings', label: 'Resp, Indeterminate' },
+            { key: 'has_blue_eyes', label: 'N, N1b' },
+            { key: 'has_red_hair', label: 'Focality, Uni-Focal' }
+        ];
+        
+        // Current active feature label set (start with set 1)
+        let currentFeatureLabels = featureLabelsSet1;
+        let useFeatureSet1 = true;
+        
+        // Parse CSV data
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            const headers = lines[0].split(',');
+            
+            return lines.slice(1).map(line => {
+                const values = line.split(',');
+                const obj = {};
+                
+                headers.forEach((header, i) => {
+                    // Convert "0" and "1" strings to actual booleans for binary features
+                    if (values[i] === "0" || values[i] === "1") {
+                        obj[header] = values[i] === "1";
+                    } else {
+                        obj[header] = values[i];
+                    }
+                });
+                
+                return obj;
+            });
+        }
+        
+        // Parse the CSV into character data
+        const allCharacters = parseCSV(csvData);
+        
+        // Split characters into board characters (first 24) and player characters (last 6)
+        const boardCharacters = allCharacters.slice(0, 24);
+        const playerCharacters = allCharacters.slice(24);
+        
+        let yourCharacter; // Will store the player's character
+        
+        // Function to create the feature list for a character
+        function createFeatureList(character, featureLabels, useLargeNames=true) {
+            const featureList = document.createElement('ul');
+            featureList.className = 'feature-list';
+            
+            featureLabels.forEach(feature => {
+                const featureItem = document.createElement('li');
+                featureItem.className = 'feature-item';
+                
+                const featureName = document.createElement('span');
+                if (useLargeNames) {
+                    featureName.className = 'feature-name';
+                } else {
+                    featureName.className = 'feature-name-small';
+                }
+                // featureName.className = 'feature-name';
+                featureName.textContent = feature.label + ':';
+                
+                const featureValue = document.createElement('span');
+                featureValue.className = `feature-value ${character[feature.key] ? 'true' : 'false'}`;
+                featureValue.textContent = character[feature.key] ? 'YES' : 'NO';
+                
+                featureItem.appendChild(featureName);
+                featureItem.appendChild(featureValue);
+                featureList.appendChild(featureItem);
+            });
+            
+            return featureList;
+        }
+        
+        // Function to update all feature labels on the page
+        function updateAllFeatureLabels() {
+            // Update board character cards
+            boardCharacters.forEach((character, index) => {
+                const card = document.querySelectorAll('.card')[index];
+                const featureList = card.querySelector('.feature-list');
+                
+                // Create new feature list with current labels
+                const newFeatureList = createFeatureList(character, currentFeatureLabels, useFeatureSet1);
+                
+                // Replace the old feature list with the new one
+                featureList.parentNode.replaceChild(newFeatureList, featureList);
+            });
+            
+            // Update player character in sidebar
+            const yourCharacterFeatureList = document.getElementById('your-character-features');
+            const newYourCharacterFeatureList = createFeatureList(yourCharacter, currentFeatureLabels, useFeatureSet1);
+            
+            // Replace the old feature list with the new one
+            yourCharacterFeatureList.innerHTML = '';
+            yourCharacterFeatureList.appendChild(newYourCharacterFeatureList);
+        }
+        
+        // Function to create all character cards
+        function createCards() {
+            const cardsContainer = document.getElementById('cards-container');
+            cardsContainer.innerHTML = ''; // Clear container first
+            
+            boardCharacters.forEach(character => {
+                // Create card elements
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                const cardInner = document.createElement('div');
+                cardInner.className = 'card-inner';
+                
+                const cardFront = document.createElement('div');
+                cardFront.className = 'card-front';
+                // Add nationality-based border
+                cardFront.classList.add(character.nationality === 'A' ? 'red-border' : 'blue-border');
+                
+                const cardBack = document.createElement('div');
+                cardBack.className = 'card-back';
+                
+                // Create character name
+                const characterName = document.createElement('div');
+                characterName.className = 'character-name';
+                characterName.textContent = character.name;
+                
+                // Get feature list
+                const featureList = createFeatureList(character, currentFeatureLabels, useFeatureSet1);
+                
+                // Assemble the card
+                cardFront.appendChild(characterName);
+                cardFront.appendChild(featureList);
+                
+                cardInner.appendChild(cardFront);
+                cardInner.appendChild(cardBack);
+                
+                card.appendChild(cardInner);
+                
+                // Add click event to flip the card
+                card.addEventListener('click', function() {
+                    this.classList.toggle('flipped');
+                });
+                
+                // Add card to the container
+                cardsContainer.appendChild(card);
+            });
+        }
+        
+        // Function to select a random character for the player
+        function selectRandomPlayerCharacter() {
+            const randomIndex = Math.floor(Math.random() * playerCharacters.length);
+            const selectedCharacter = playerCharacters[randomIndex];
+            
+            // Display the character name in the sidebar
+            document.getElementById('your-character-name').textContent = selectedCharacter.name;
+            
+            // Display the character features
+            const featureList = createFeatureList(selectedCharacter, currentFeatureLabels);
+            document.getElementById('your-character-features').innerHTML = '';
+            document.getElementById('your-character-features').appendChild(featureList);
+            
+            return selectedCharacter;
+        }
+        
+        // Function to set up the toggle feature names button
+        function setupToggleButton() {
+            const toggleButton = document.getElementById('toggle-features-button');
+            
+            toggleButton.addEventListener('click', function() {
+                // Toggle between feature label sets
+                useFeatureSet1 = !useFeatureSet1;
+                currentFeatureLabels = useFeatureSet1 ? featureLabelsSet1 : featureLabelsSet2;
+                
+                // Update all feature labels on the page
+                updateAllFeatureLabels();
+
+                if (useFeatureSet1){
+                    document.getElementById('your_character').textContent = "Your Character";
+                }else{
+                    document.getElementById('your_character').textContent = "Your Patient";
+                }
+                
+                // Update button text to indicate current set
+                this.textContent = useFeatureSet1 ? 
+                    'Toggle to Real Problem' : 
+                    'Toggle to Intuitive Problem';
+            });
+        }
+        
+        // Function to handle nationality guesses
+        function setupGuessButtons() {
+            const redButton = document.getElementById('red-button');
+            const blueButton = document.getElementById('blue-button');
+            const resultMessage = document.getElementById('result-message');
+            
+            redButton.addEventListener('click', function() {
+                makeGuess('A');
+            });
+            
+            blueButton.addEventListener('click', function() {
+                makeGuess('B');
+            });
+            
+            function makeGuess(guessedNationality) {
+                // Disable buttons after guess
+                redButton.disabled = true;
+                blueButton.disabled = true;
+                
+                // Show result message
+                resultMessage.style.display = 'block';
+                
+                if (guessedNationality === yourCharacter.nationality) {
+                    resultMessage.textContent = 'Correct! Your character belongs to Group ' + yourCharacter.nationality + '!';
+                    resultMessage.className = 'result-message correct';
+                } else {
+                    resultMessage.textContent = 'Incorrect! Your character belongs to Group ' + yourCharacter.nationality + '!';
+                    resultMessage.className = 'result-message incorrect';
+                }
+            }
+        }
+        
+        // Initialize the game
+        function initGame() {
+            createCards();
+            yourCharacter = selectRandomPlayerCharacter();
+            setupGuessButtons();
+            setupToggleButton();
+            console.log("Your character is:", yourCharacter.name, "with nationality:", yourCharacter.nationality);
+        }
+        
+        // Start the game when the page loads
+        window.onload = initGame;
+    </script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess Who Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .game-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+        
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            flex: 3;
+        }
+        
+        .card {
+            height: 240px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .card-front {
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card-back {
+            background: linear-gradient(135deg, #e0e0e0, #c0c0c0);
+            transform: rotateY(180deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card-back::after {
+            content: "X";
+            font-size: 4em;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .character-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .character-name {
+            padding: 10px;
+            font-weight: bold;
+        }
+        
+        .sidebar {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .sidebar h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .your-character {
+            width: 100%;
+            max-width: 200px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin-bottom: 15px;
+        }
+        
+        .character-label {
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                order: -1;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Guess Who?</h1>
+    
+    <div class="game-container">
+        <div class="cards-grid" id="cards-container">
+            <!-- Cards will be generated here by JavaScript -->
+        </div>
+        
+        <div class="sidebar">
+            <h2>Your Character</h2>
+            <img id="your-character-img" class="your-character" src="" alt="Your character">
+            <div id="your-character-name" class="character-label"></div>
+            
+            <div class="instructions">
+                <p>Try to guess which character your opponent has by eliminating characters one by one.</p>
+                <p>Click on cards to flip them over when you've ruled them out.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Array of character data (normally you would load this from a server)
+        const charactersOrdered = [
+            { name: "Alexa", image: "characters/char_1.png" },
+            { name: "Bernard", image: "characters/char_2.png" },
+            { name: "Claire", image: "characters/char_3.png" },
+            { name: "David", image: "characters/char_4.png" },
+            { name: "Frank", image: "characters/char_5.png" },
+            { name: "Isabella", image: "characters/char_6.png" },
+            { name: "Jenny", image: "characters/char_7.png" },
+            { name: "Frank", image: "characters/char_8.png" },
+            { name: "Lisa", image: "characters/char_9.png" },
+            { name: "Karl", image: "characters/char_10.png" },
+            { name: "Nancy", image: "characters/char_11.png" },
+            { name: "Martin", image: "characters/char_12.png" },
+            { name: "Quincy", image: "characters/char_13.png" },
+            { name: "Sarah", image: "characters/char_14.png" },
+            { name: "Hannah", image: "characters/char_15.png" },
+            { name: "Jennifer", image: "characters/char_16.png" },
+            { name: "Robert", image: "characters/char_17.png" },
+            { name: "Oliver", image: "characters/char_18.png" },
+            { name: "Carla", image: "characters/char_19.png" },
+            { name: "Tom", image: "characters/char_20.png" },
+            { name: "Eva", image: "characters/char_21.png" },
+            { name: "Victor", image: "characters/char_22.png" },
+            { name: "William", image: "characters/char_23.png" },
+            { name: "Xavier", image: "characters/char_24.png" }
+        ];
+
+        const randomOrder = [17, 19, 22, 21,  9,  1, 18, 11, 12, 23,  8, 15,  7,  0,  6, 13, 20, 10, 14,  5,  4,  2, 16, 3];
+        
+        // Shuffle the characters array based on the random order
+        const characters = randomOrder.map(index => charactersOrdered[index]);
+        
+        // Function to create all character cards
+        function createCards() {
+            const cardsContainer = document.getElementById('cards-container');
+            
+            characters.forEach(character => {
+                // Create card elements
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                const cardInner = document.createElement('div');
+                cardInner.className = 'card-inner';
+                
+                const cardFront = document.createElement('div');
+                cardFront.className = 'card-front';
+                
+                const cardBack = document.createElement('div');
+                cardBack.className = 'card-back';
+                
+                // Create character image and name
+                const characterImage = document.createElement('img');
+                characterImage.className = 'character-image';
+                characterImage.src = character.image;
+                characterImage.alt = character.name;
+                
+                const characterName = document.createElement('div');
+                characterName.className = 'character-name';
+                characterName.textContent = character.name;
+                
+                // Assemble the card
+                cardFront.appendChild(characterImage);
+                cardFront.appendChild(characterName);
+                
+                cardInner.appendChild(cardFront);
+                cardInner.appendChild(cardBack);
+                
+                card.appendChild(cardInner);
+                
+                // Add click event to flip the card
+                card.addEventListener('click', function() {
+                    this.classList.toggle('flipped');
+                });
+                
+                // Add card to the container
+                cardsContainer.appendChild(card);
+            });
+        }
+        
+        // Function to select a random character for the player
+        function selectRandomCharacter() {
+            const randomIndex = Math.floor(Math.random() * characters.length);
+            const selectedCharacter = characters[randomIndex];
+            
+            // Display the random character in the sidebar
+            document.getElementById('your-character-img').src = selectedCharacter.image;
+            document.getElementById('your-character-name').textContent = selectedCharacter.name;
+            
+            return selectedCharacter;
+        }
+        
+        // Initialize the game
+        function initGame() {
+            createCards();
+            const yourCharacter = selectRandomCharacter();
+            console.log("Your character is:", yourCharacter.name);
+        }
+        
+        // Start the game when the page loads
+        window.onload = initGame;
+    </script>
+</body>
+</html>
