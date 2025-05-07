@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binary Features Guessing Game</title>
+    <title>Actual Problem Revealed</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -71,7 +71,7 @@
         }
         
         .card-back::after {
-            content: "?";
+            content: "X";
             font-size: 4em;
             color: #ffffff;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
@@ -267,7 +267,7 @@
     </style>
 </head>
 <body>
-    <h1>Binary Features Guessing Game</h1>
+    <h1>Actual Problem Revealed: Thyroid Cancer Recurrence</h1>
     
     <div class="controls">
         <button id="toggle-features-button" class="toggle-button">Toggle to Real Problem</button>
@@ -288,17 +288,16 @@
             </div>
             
             <div class="nationality-container">
-                <button id="red-button" class="nationality-button red-nationality">Group A</button>
-                <button id="blue-button" class="nationality-button blue-nationality">Group B</button>
+                <!-- <button id="red-button" class="nationality-button red-nationality">Group A</button>
+                <button id="blue-button" class="nationality-button blue-nationality">Group B</button> -->
             </div>
             
             <div id="result-message" class="result-message"></div>
             
             <div class="instructions">
-                <p>Analyze the features of the characters on the board to determine which group your character belongs to.</p>
-                <p>Red borders indicate characters from Group A.</p>
-                <p>Blue borders indicate characters from Group B.</p>
-                <p>Make your guess by clicking one of the group buttons.</p>
+                <p>Analyze the features of the characters/patients on the board to determine which class they belong to.</p>
+                <p>Red borders indicate patients where cancer did not Recurr.</p>
+                <p>Blue borders indicate patients where cancer Recurred.</p>
                 <p>You can toggle between different feature naming systems using the purple button at the top.</p>
             </div>
         </div>
@@ -307,36 +306,36 @@
     <script>
         // CSV data hardcoded as raw text
         const csvData = `name,has_glasses,has_hat,has_beard,has_mustache,has_earrings,has_blue_eyes,has_red_hair,nationality
-Alex,1,0,0,0,0,1,0,A
-Bernard,0,1,1,0,0,0,0,B
-Claire,1,0,0,0,1,1,0,A
-David,0,0,1,1,0,0,0,B
-Eric,0,1,0,0,0,1,0,A
-Frans,0,0,0,1,0,0,1,B
-George,1,0,1,0,0,1,0,A
-Herman,0,1,0,0,0,0,1,B
-Isabella,1,0,0,0,1,1,0,A
-Jenny,0,1,0,0,1,0,0,B
-Karl,1,0,1,1,0,1,0,A
-Lisa,0,0,0,0,1,0,1,B
-Martin,1,1,0,0,0,1,0,A
-Nancy,0,1,0,0,1,0,0,B
-Oliver,1,0,1,0,0,1,0,A
-Peter,0,0,0,1,0,0,1,B
-Quincy,1,1,0,0,0,1,0,A
-Robert,0,0,1,1,0,0,0,B
-Sarah,1,0,0,0,1,1,0,A
-Tom,0,1,0,0,0,0,1,B
-Ursula,1,0,0,0,1,1,0,A
-Victor,0,0,1,1,0,0,0,B
-William,1,1,0,0,0,1,0,A
-Xavier,0,0,0,1,0,0,1,B
-Zoe,1,0,0,0,1,1,0,A
-Yann,0,1,1,0,0,0,0,B
-Wendy,1,0,0,0,1,1,0,A
-Vincent,0,0,1,1,0,0,0,B
-Ulrich,0,1,0,0,0,1,0,A
-Tina,0,0,0,0,1,0,1,B`;
+Oliver,1,0,0,0,0,0,0,1
+Tom,0,1,0,0,1,1,1,1
+William,1,0,0,0,1,0,1,1
+Victor,1,1,0,0,0,1,0,1
+Karl,0,1,1,0,1,1,1,0
+Bernard,0,1,1,0,0,0,1,0
+Carla,1,1,0,1,0,1,0,1
+Martin,0,1,1,0,1,1,0,0
+Quincy,1,0,0,1,1,1,0,1
+Xavier,1,1,0,0,1,0,1,1
+Lisa,0,1,1,1,0,0,0,0
+Jennifer,1,0,0,1,1,1,1,1
+Frank,0,1,1,0,1,0,1,0
+Alex,0,1,0,1,1,1,1,0
+Jenny,0,1,1,1,1,0,1,0
+Sarah,0,1,0,1,0,1,0,1
+Eva,1,0,0,1,1,0,1,1
+Nancy,0,1,1,1,1,0,0,0
+Hannah,1,0,0,1,0,1,0,1
+Isabella,0,1,0,1,1,0,1,0
+Gregory,0,1,1,0,1,0,0,0
+Claire,0,1,1,1,1,1,0,0
+Robert,1,0,0,0,1,0,0,1
+David,0,1,1,0,0,1,1,0
+Vincent,1,0,0,0,0,1,0,1
+Wendy,1,1,0,1,1,0,1,1
+Yann,1,0,0,0,1,1,0,1
+Tina,0,1,1,1,0,0,1,0
+John,0,1,1,0,1,1,1,0
+Zoe,0,1,1,1,1,0,1,0`;
 
         // Define two sets of feature labels
         const featureLabelsSet1 = [
@@ -463,7 +462,7 @@ Tina,0,0,0,0,1,0,1,B`;
                 const cardFront = document.createElement('div');
                 cardFront.className = 'card-front';
                 // Add nationality-based border
-                cardFront.classList.add(character.nationality === 'A' ? 'red-border' : 'blue-border');
+                cardFront.classList.add(character.nationality == 0 ? 'red-border' : 'blue-border');
                 
                 const cardBack = document.createElement('div');
                 cardBack.className = 'card-back';
@@ -572,7 +571,7 @@ Tina,0,0,0,0,1,0,1,B`;
         function initGame() {
             createCards();
             yourCharacter = selectRandomPlayerCharacter();
-            setupGuessButtons();
+            // setupGuessButtons();
             setupToggleButton();
             console.log("Your character is:", yourCharacter.name, "with nationality:", yourCharacter.nationality);
         }

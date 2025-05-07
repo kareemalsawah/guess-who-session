@@ -333,8 +333,8 @@
         
         // Function to select a random character for the player
         function selectRandomPlayerCharacter() {
-            const randomIndex = Math.floor(Math.random() * boardCharacters.length);
-            const selectedCharacter = boardCharacters[randomIndex];
+            const randomIndex = Math.floor(Math.random() * playerCharacters.length);
+            const selectedCharacter = playerCharacters[randomIndex];
             
             // Display the random character in the sidebar
             document.getElementById('your-character-img').src = selectedCharacter.image;
